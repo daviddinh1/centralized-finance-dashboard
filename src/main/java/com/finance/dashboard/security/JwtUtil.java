@@ -25,7 +25,7 @@ public class JwtUtil {
 
     }
 
-    String generateJWTToken(String email){
+    public String generateJWTToken(String email){
         SecretKey key = getSigningKey();
         return Jwts.builder().subject(email).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expiration)).signWith(key).compact();
     }
@@ -39,7 +39,7 @@ public class JwtUtil {
         }
     }
 
-    String extractEmail(String token){
+    public String extractEmail(String token){
         Claims allClaims = extractAllClaims(token);
         return allClaims.getSubject();
     }
@@ -50,7 +50,7 @@ public class JwtUtil {
         return expirationDate.before(new Date()); //if the expirationDate is before the current date it is expired
     }
 
-    Boolean validateToken(String token, String email){
+    public Boolean validateToken(String token, String email){
         return email.equals(extractEmail(token)) && !isTokenExpired(token);
     }
 }
