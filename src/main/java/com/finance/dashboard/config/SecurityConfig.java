@@ -25,7 +25,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.csrf(csrf -> csrf.disable())
                 //configure which endpoints need auth here
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth**").permitAll()
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated())
 
                 //declare stateless here since we r using rest api
