@@ -7,6 +7,9 @@ import com.finance.dashboard.repository.HoldingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class HoldingService {
@@ -19,7 +22,6 @@ public class HoldingService {
         holding.setTicker(request.getTicker());
         holding.setShares(request.getShares());
         holding.setPurchasePrice(request.getPurchasePrice());
-        holding.setPurchaseDate(request.getPurchaseDate());
         holding.setUserId(userId);
         holding.setAccountId(request.getAccountId());
 
@@ -29,7 +31,14 @@ public class HoldingService {
     }
 
     //get all holdings for a user
+    public List<HoldingDTO> getAllHoldings(String userId){
+        List<Holding> holdings = holdingRepository.findByUserId(userId);
 
+        //use a steam to map it into our list
+        return holdings.stream()
+                .map(HoldingDTO::fromEntity) //:: basically means using this method
+                .collect(Collectors.toList());
+    }
 
     //get holding by id
 
