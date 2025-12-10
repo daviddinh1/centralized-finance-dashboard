@@ -1,6 +1,7 @@
 package com.finance.dashboard.scheduler;
 
 import com.finance.dashboard.model.Holding;
+import com.finance.dashboard.model.PriceHistory;
 import com.finance.dashboard.repository.HoldingRepository;
 import com.finance.dashboard.repository.PriceHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class PriceUpdateScheduler {
     private String apiKey;
 
     @Scheduled(cron = "0 * * * * *")
-    public void UpdateStockPrices(){
+    public void updateStockPrices(){
         log.info("UpdateStockPrices -- Price update started");
         List<Holding> allHoldings = holdingRepository.findAll();
 
@@ -46,6 +47,12 @@ public class PriceUpdateScheduler {
                 );
                 Map<String,Object> response = restTemplate.getForObject(url, Map.class);
 
+                //check if api response does not contain global quote
+                if (response == null || !response.containsKey("Global Quote")) {
+                    log.error("Invalid response for ticker {}", ticker);
+                    continue;  // Skip to next ticker
+                }
+
                 //extract price from json structure
                 Map<String, String> quote = (Map<String, String>) response.get("Global Quote");
                 String priceString = quote.get("05. price");
@@ -57,15 +64,18 @@ public class PriceUpdateScheduler {
                 }
                 holdingRepository.saveAll(holdings);
 
+                PriceHistory priceHistory = new PriceHistory();
+                priceHistory.setPrice(price);
+                priceHistory.setTicker(ticker);
+                priceHistoryRepository.save(priceHistory);
+
                 //rate limiter
                 Thread.sleep(12000);
             } catch(Exception e){
                 log.error("Error updating ticker {}: {}", ticker, e.getMessage());
 
             }
-            log.info("UpdateStockPrices -- Price update completed");
-
         }
-
+        log.info("UpdateStockPrices -- Price update completed");
     }
 }
