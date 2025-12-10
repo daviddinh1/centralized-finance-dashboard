@@ -8,4 +8,5 @@ import java.util.List;
 public interface HoldingRepository extends MongoRepository<Holding,String> {
     List<Holding> findByUserId(String userId);
     List<Holding> findByUserIdAndTicker(String userId, String ticker);
+    List<Holding> findByTicker(String ticker);
 }
