@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TransactionRepository extends MongoRepository<Transaction,String> {
-    List<Transaction> findByUserId(String userId);
+    List<Transaction> findByUserIdOrderByDateDesc(String userId);
     List<Transaction> findByUserIdAndType(String userId, TransactionType type);
     List<Transaction> findByUserIdAndCategory(String userId, String category);
-    List<Transaction> findTransactionByDateBetween(LocalDateTime dateAfter, LocalDateTime dateBefore);
+    List<Transaction> findByUserIdAndDateBetween(String userId,LocalDateTime dateAfter, LocalDateTime dateBefore);
 }
