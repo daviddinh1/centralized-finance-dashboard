@@ -30,7 +30,7 @@ public class PriceUpdateScheduler {
     @Value("${alphavantage.api.key}")
     private String apiKey;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 9 * * *")
     public void updateStockPrices(){
         log.info("UpdateStockPrices -- Price update started");
         List<Holding> allHoldings = holdingRepository.findAll();
