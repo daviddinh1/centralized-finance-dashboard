@@ -56,7 +56,7 @@ public class TransactionService {
     }
 
     //update transaction by id
-    public TransactionDTO updateTransactionById(CreateTransactionRequest request, String id, String userId){
+    public TransactionDTO updateTransactionById(String id,CreateTransactionRequest request,String userId){
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Transaction does not exist"));
 
         if(!transaction.getUserId().equals(userId)){
