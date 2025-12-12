@@ -11,5 +11,5 @@ public interface TransactionRepository extends MongoRepository<Transaction,Strin
     List<Transaction> findByUserIdOrderByDateDesc(String userId);
     List<Transaction> findByUserIdAndType(String userId, TransactionType type);
     List<Transaction> findByUserIdAndCategory(String userId, String category);
-    List<Transaction> findByUserIdAndDateBetween(String userId,LocalDateTime dateAfter, LocalDateTime dateBefore);
+    List<Transaction> findByUserIdAndDateBetween(String userId,LocalDateTime dateBefore, LocalDateTime dateAfter);
 }
