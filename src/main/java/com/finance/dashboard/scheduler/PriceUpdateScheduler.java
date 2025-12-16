@@ -7,6 +7,7 @@ import com.finance.dashboard.repository.PriceHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -40,23 +41,11 @@ public class PriceUpdateScheduler {
 
         for(String ticker : uniqueTickers){
             try{
-                String url = String.format(
-                        "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=%s",
-                        ticker,
-                        apiKey
-                );
-                Map<String,Object> response = restTemplate.getForObject(url, Map.class);
+                BigDecimal price = fetchStockPrice(ticker);
 
-                //check if api response does not contain global quote
-                if (response == null || !response.containsKey("Global Quote")) {
-                    log.error("Invalid response for ticker {}", ticker);
-                    continue;  // Skip to next ticker
+                if(price == null){
+                    log.error("Failed to fetch price for {}", ticker);
                 }
-
-                //extract price from json structure
-                Map<String, String> quote = (Map<String, String>) response.get("Global Quote");
-                String priceString = quote.get("05. price");
-                BigDecimal price = new BigDecimal(priceString);
 
                 List<Holding> holdings = holdingRepository.findByTicker(ticker);
                 for(Holding holding : holdings){
@@ -77,5 +66,31 @@ public class PriceUpdateScheduler {
             }
         }
         log.info("UpdateStockPrices -- Price update completed");
+    }
+
+    @Cacheable(value ="stockPrices", key = "#ticker")
+    public BigDecimal fetchStockPrice(String ticker){
+        log.info("CACHE MISS - Fetching {} from Alpha Vantage API", ticker);
+
+        String url = String.format(
+                "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=%s",
+                ticker, apiKey
+        );
+
+        try{
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+
+            if (response == null || !response.containsKey("Global Quote")) {
+                log.error("Invalid response for ticker {}", ticker);
+                return null;
+            }
+
+            Map<String,String> quote = (Map<String, String>) response.get("Global Quote");
+            String priceString = quote.get("05. price");
+            return new BigDecimal(priceString);
+        }catch(Exception e){
+            log.error("Error fetching price for {}: {}", ticker, e.getMessage());
+            return null;
+        }
     }
 }
