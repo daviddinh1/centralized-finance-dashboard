@@ -45,6 +45,7 @@ public class PriceUpdateScheduler {
 
                 if(price == null){
                     log.error("Failed to fetch price for {}", ticker);
+                    continue; //skip to the next ticker
                 }
 
                 List<Holding> holdings = holdingRepository.findByTicker(ticker);
