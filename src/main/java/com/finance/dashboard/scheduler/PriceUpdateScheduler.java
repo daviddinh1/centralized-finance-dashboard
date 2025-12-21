@@ -4,6 +4,7 @@ import com.finance.dashboard.model.Holding;
 import com.finance.dashboard.model.PriceHistory;
 import com.finance.dashboard.repository.HoldingRepository;
 import com.finance.dashboard.repository.PriceHistoryRepository;
+import com.finance.dashboard.service.StockPriceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,7 @@ public class PriceUpdateScheduler {
     //inject repositories we need
     private final HoldingRepository holdingRepository;
     private final PriceHistoryRepository priceHistoryRepository;
-    private final RestTemplate restTemplate;
-
-    //inject api key from properties
-    @Value("${alphavantage.api.key}")
-    private String apiKey;
+    private final StockPriceService stockPriceService;
 
     @Scheduled(cron = "0 0 9 * * *")
     public void updateStockPrices(){
@@ -41,7 +38,7 @@ public class PriceUpdateScheduler {
 
         for(String ticker : uniqueTickers){
             try{
-                BigDecimal price = fetchStockPrice(ticker);
+                BigDecimal price = stockPriceService.fetchStockPrice(ticker);
 
                 if(price == null){
                     log.error("Failed to fetch price for {}", ticker);
@@ -67,31 +64,5 @@ public class PriceUpdateScheduler {
             }
         }
         log.info("UpdateStockPrices -- Price update completed");
-    }
-
-    @Cacheable(value ="stockPrices", key = "#ticker")
-    public BigDecimal fetchStockPrice(String ticker){
-        log.info("CACHE MISS - Fetching {} from Alpha Vantage API", ticker);
-
-        String url = String.format(
-                "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=%s",
-                ticker, apiKey
-        );
-
-        try{
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
-            if (response == null || !response.containsKey("Global Quote")) {
-                log.error("Invalid response for ticker {}", ticker);
-                return null;
-            }
-
-            Map<String,String> quote = (Map<String, String>) response.get("Global Quote");
-            String priceString = quote.get("05. price");
-            return new BigDecimal(priceString);
-        }catch(Exception e){
-            log.error("Error fetching price for {}: {}", ticker, e.getMessage());
-            return null;
-        }
     }
 }
