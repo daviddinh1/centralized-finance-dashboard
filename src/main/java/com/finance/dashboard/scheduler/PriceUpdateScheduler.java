@@ -6,16 +6,13 @@ import com.finance.dashboard.repository.HoldingRepository;
 import com.finance.dashboard.repository.PriceHistoryRepository;
 import com.finance.dashboard.service.StockPriceService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+
 
 
 @Slf4j
