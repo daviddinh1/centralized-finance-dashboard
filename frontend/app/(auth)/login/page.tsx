@@ -43,22 +43,20 @@ export default function LoginPage() {
         }catch(error){
             if (isAxiosError(error)) {
                 // TypeScript now knows 'error' is of type AxiosError
-                console.log(formValues);
-                console.log('Axios error message:', error.message);
+                setError(error.message);
                 if (error.response) {
                     // The server responded with a status code that falls out of the range of 2xx
-                    console.log('Status code:', error.response.status);
+                    setError(`${error.response.status}`);
                 } else if (error.request) {
                     // The request was made but no response was received
-                    console.log('No response received:', error.request);
+                    setError(error.request);
                 }
             } else {
                 // Handle non-Axios errors (e.g., a bug in your code, network issue, etc.)
-                console.log('An unexpected error occurred:', error);
+                setError(`${error}`);
             }
         }finally{
             setLoading(false);
-
         }
     }
 
